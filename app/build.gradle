@@ -15,8 +15,8 @@ android {
         applicationId 'com.akaswising.conshite'
         minSdk 24
         targetSdk 36
-        versionCode 120401
-        versionName '1.20.4-conshite.2'
+        versionCode 120402
+        versionName '1.20.4-conshite.3'
     }
 
     compileOptions {
