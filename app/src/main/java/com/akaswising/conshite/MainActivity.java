@@ -83,6 +83,24 @@ public final class MainActivity extends AppCompatActivity {
 
         buildDashboard();
         renderDashboard();
+        handleIncomingGameIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIncomingGameIntent(intent);
+    }
+
+    private void handleIncomingGameIntent(Intent intent) {
+        if (intent == null || !Intent.ACTION_VIEW.equals(intent.getAction())) return;
+        Uri uri = intent.getData();
+        if (uri == null) {
+            Toast.makeText(this, "No game file was received.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        onGamePicked(uri);
     }
 
     private void initializePythonRuntime() {
