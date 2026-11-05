@@ -12,11 +12,11 @@ Conshite pins the upstream PPSSPP **v1.20.4** source as the `ppsspp` Git submodu
 - External controllers: upstream Android key and joystick event handling.
 - Disc images: upstream supported PSP loaders, including ISO and CSO.
 
-The Conshite Java GameHub stores selected ISO/CSO URIs and explicitly launches the bundled `PpssppActivity`. The upstream activity handles the native emulator lifecycle, Android graphics surface, touch input, and gamepad input.
+The Java GameHub presents a Play action after a library item is selected. Java calls the embedded Python 3.11 controller (`app/src/main/python/conshite_runtime.py`) to validate the selected ISO/CSO path and prepare launch metadata. Java then explicitly launches the bundled `PpssppActivity`. Python is the game-launch controller, not the PSP emulator engine. The upstream activity handles the native emulator lifecycle, Android graphics surface, touch input, and gamepad input.
 
 ## Runtime rule
 
-The Android CMake configuration explicitly selects `c++_shared`. CI verifies both `libppsspp_jni.so` and `libc++_shared.so` for `arm64-v8a` and `armeabi-v7a`.
+The Android CMake configuration explicitly selects `c++_shared`. The app also embeds Python 3.11 through Chaquopy. CI verifies `libppsspp_jni.so`, `libc++_shared.so`, and `libpython3.11.so` for `arm64-v8a` and `armeabi-v7a`.
 
 ## Source and license
 
