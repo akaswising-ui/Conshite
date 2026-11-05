@@ -25,12 +25,9 @@ The planned PSP core candidate is the upstream PPSSPP C++ project. Its source is
 
 ## Runtime guarantee
 
-Every configured Android ABI must include the Android NDK C++ runtime required by native libraries. The initial project uses c++_shared because the emulator integration is expected to involve multiple native shared libraries. CI checks the APK for:
+Every configured Android ABI must include the Android NDK C++ runtime required by native libraries. The initial project uses c++_shared because the emulator integration is expected to involve multiple native shared libraries. CI checks that libc++_shared.so is present for each configured ABI.
 
-- lib/arm64-v8a/libc++_shared.so
-- lib/armeabi-v7a/libc++_shared.so
-
-Do not mix different C++ runtime variants across native libraries.
+Do not mix different C++ runtime variants across native libraries. Any future native emulator library must use the same shared C++ runtime and remain covered by the APK runtime verification step.
 
 ## Games and files
 
@@ -38,6 +35,6 @@ Conshite does not bundle commercial game files. Add only game files you are enti
 
 ## Build
 
-Open the repository in Android Studio with Android SDK Platform 37, NDK 28.2.13676358, CMake 3.22.1, and JDK 17. The GitHub Actions workflow builds the debug APK automatically on pushes and pull requests to main.
+Open the repository in Android Studio with Android SDK Platform 36, NDK 28.2.13676358, CMake 3.22.1, and JDK 17. The GitHub Actions workflow builds the debug APK automatically on pushes and pull requests to main.
 
 See [core/README.md](core/README.md) for the PSP-core integration gate.
