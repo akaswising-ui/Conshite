@@ -10,13 +10,13 @@ Conshite pins the upstream PPSSPP **v1.20.4** source as the `ppsspp` Git submodu
 - Android rendering: upstream JNI and Android surface integration.
 - Touch controls: upstream on-screen PSP controller.
 - External controllers: upstream Android key and joystick event handling.
-- Disc images: upstream supported PSP image loaders, including ISO/CSO.
+- Disc images: upstream supported PSP loaders, including ISO and CSO.
 
-The Android app compiles the PPSSPP `ppsspp_jni` native library from the pinned source. It does not load a separately installed emulator app.
+The Conshite Java GameHub stores selected ISO/CSO URIs and explicitly launches the bundled `PpssppActivity`. The upstream activity handles the native emulator lifecycle, Android graphics surface, touch input, and gamepad input.
 
 ## Runtime rule
 
-The Android CMake configuration explicitly selects `c++_shared`. All configured ABIs must package both `libppsspp_jni.so` and `libc++_shared.so`. CI verifies arm64-v8a and armeabi-v7a.
+The Android CMake configuration explicitly selects `c++_shared`. CI verifies both `libppsspp_jni.so` and `libc++_shared.so` for `arm64-v8a` and `armeabi-v7a`.
 
 ## Source and license
 
@@ -24,8 +24,8 @@ The Android CMake configuration explicitly selects `c++_shared`. All configured 
 - Pinned release: v1.20.4
 - License: GPL-2.0-or-later
 
-Do not remove upstream copyright notices. Any redistributed modified build must comply with the GPL source and notice requirements.
+Do not remove upstream copyright notices. Distributed modified builds must comply with source and notice requirements.
 
 ## Testing boundary
 
-CI proves that the Android app and native emulator library compile and that the C++ runtime is packaged. It does not prove that every game boots or runs at full speed. Commercial game compatibility requires legal test images and real-device testing; no game images are stored in this repository.
+CI proves native compilation and Android packaging only. It does not prove that every game boots or runs at full speed. Record actual results in [the compatibility test plan](../docs/PSP-COMPATIBILITY-TESTING.md). No game images are stored in this repository.

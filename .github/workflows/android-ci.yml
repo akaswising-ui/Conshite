@@ -40,20 +40,20 @@ jobs:
         with:
           gradle-version: "9.4.1"
 
-      - name: Build Java frontend and native C++ emulator
+      - name: Build Java GameHub and C++ PSP emulator
         run: gradle --no-daemon --stacktrace :app:assembleNormalDebug
 
-      - name: Verify emulator libraries and shared C++ runtime
+      - name: Verify native emulator and shared C++ runtime
         shell: bash
         run: |
           APK="$(find app/build/outputs/apk/normal/debug -maxdepth 1 -name '*.apk' -type f | head -n 1)"
           test -n "$APK"
           test -f "$APK"
-          unzip -l "$APK" | grep -q "lib/arm64-v8a/libppsspp_jni.so"
-          unzip -l "$APK" | grep -q "lib/armeabi-v7a/libppsspp_jni.so"
-          unzip -l "$APK" | grep -q "lib/arm64-v8a/libc++_shared.so"
-          unzip -l "$APK" | grep -q "lib/armeabi-v7a/libc++_shared.so"
-          echo "Verified native emulator and c++_shared for both Android ABIs."
+          for ABI in arm64-v8a armeabi-v7a; do
+            unzip -l "$APK" | grep -q "lib/$ABI/libppsspp_jni.so"
+            unzip -l "$APK" | grep -q "lib/$ABI/libc++_shared.so"
+          done
+          echo "Verified PPSSPP native engine and c++_shared for both configured ABIs."
 
       - name: Upload Conshite debug APK
         uses: actions/upload-artifact@v4
