@@ -401,10 +401,15 @@ public final class MainActivity extends AppCompatActivity {
                     finalCover.delete();
                     return;
                 }
-                game.put("coverPath", finalCover.getAbsolutePath());
-                saveGames();
-                renderDashboard();
-                Toast.makeText(this, "Game cover saved.", Toast.LENGTH_SHORT).show();
+                try {
+                    game.put("coverPath", finalCover.getAbsolutePath());
+                    saveGames();
+                    renderDashboard();
+                    Toast.makeText(this, "Game cover saved.", Toast.LENGTH_SHORT).show();
+                } catch (Exception error) {
+                    finalCover.delete();
+                    Toast.makeText(this, "Could not save this cover.", Toast.LENGTH_LONG).show();
+                }
             });
         });
     }
