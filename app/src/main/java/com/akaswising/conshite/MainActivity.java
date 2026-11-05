@@ -686,7 +686,7 @@ public final class MainActivity extends AppCompatActivity {
             if (nameLength <= 0 || offset + 33 + nameLength > bytes.length) return null;
             String name = new String(bytes, offset + 33, nameLength, java.nio.charset.StandardCharsets.US_ASCII);
             if (name.endsWith(";1")) name = name.substring(0, name.length() - 2);
-            if (name.equals("\u0000") || name.equals("\u0001")) name = "";
+            if (nameLength == 1 && (bytes[offset + 33] == 0 || bytes[offset + 33] == 1)) name = "";
             return new Record(extent, dataLength, (flags & 2) != 0, name);
         }
 
