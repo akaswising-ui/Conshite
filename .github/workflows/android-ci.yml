@@ -26,6 +26,14 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Set up Python 3.11 for the embedded game controller
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test Python game controller
+        run: python -m unittest discover -s tools/tests -v
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -52,8 +60,9 @@ jobs:
           for ABI in arm64-v8a armeabi-v7a; do
             unzip -l "$APK" | grep -q "lib/$ABI/libppsspp_jni.so"
             unzip -l "$APK" | grep -q "lib/$ABI/libc++_shared.so"
+            unzip -l "$APK" | grep -q "lib/$ABI/libpython3.11.so"
           done
-          echo "Verified PPSSPP native engine and c++_shared for both configured ABIs."
+          echo "Verified PPSSPP, c++_shared, and embedded Python 3.11 for both configured ABIs."
 
       - name: Upload Conshite debug APK
         uses: actions/upload-artifact@v4
