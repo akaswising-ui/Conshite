@@ -1,0 +1,108 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.protobuf'
+}
+
+android {
+    namespace 'org.ppsspp.ppsspp'
+    compileSdk 36
+    ndkVersion '29.0.14206865'
+
+    flavorDimensions 'variant'
+
+    defaultConfig {
+        applicationId 'com.akaswising.conshite'
+        minSdk 21
+        targetSdk 36
+        versionCode 120400
+        versionName '1.20.4-conshite.1'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('../ppsspp/CMakeLists.txt')
+            version '3.22.1'
+        }
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile '../ppsspp/android/AndroidManifest.xml'
+            java.srcDirs = ['../ppsspp/android/src']
+            aidl.srcDirs = ['../ppsspp/android/src']
+            res.srcDirs = [
+                '../ppsspp/android/res',
+                '../ppsspp/android/src/main/res'
+            ]
+            assets.srcDirs = ['../ppsspp/assets']
+            proto.srcDirs = ['../ppsspp/android/src/main/proto']
+        }
+        normal {
+            res.srcDirs = [
+                'src/normal/res',
+                '../ppsspp/android/normal/res'
+            ]
+        }
+    }
+
+    productFlavors {
+        normal {
+            dimension 'variant'
+            applicationId 'com.akaswising.conshite'
+
+            externalNativeBuild {
+                cmake {
+                    arguments.addAll([
+                        '-DANDROID=true',
+                        '-DANDROID_PLATFORM=android-21',
+                        '-DANDROID_TOOLCHAIN=clang',
+                        '-DANDROID_CPP_FEATURES=',
+                        '-DANDROID_STL=c++_shared'
+                    ])
+                }
+            }
+
+            ndk {
+                abiFilters.addAll(['arm64-v8a', 'armeabi-v7a'])
+            }
+        }
+    }
+
+    buildFeatures {
+        aidl true
+        buildConfig true
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.25.3'
+    }
+
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.documentfile:documentfile:1.1.0'
+    implementation 'com.google.protobuf:protobuf-javalite:4.33.5'
+}

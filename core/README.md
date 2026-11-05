@@ -1,22 +1,31 @@
-# Emulator core integration
+# PSP emulator core
 
-## Initial target: PlayStation Portable (PSP)
+Conshite pins the upstream PPSSPP **v1.20.4** source as the `ppsspp` Git submodule.
 
-Conshite's first console target is PSP because the initial product brief calls for a PPSSPP-style emulator and ISO/CSO game files. This is not a promise that every console format will work.
+## Integrated subsystems
 
-The Android app currently has a GameHub shell, persistent document-URI library, and a native C++ runtime smoke test. It does **not** contain a PSP CPU/GPU/audio emulator yet, so game launch remains disabled.
+- PSP CPU emulation and JIT/interpreter paths: upstream PPSSPP C++ Core.
+- PSP graphics emulation: upstream GPU/GE implementation and Android graphics contexts.
+- Audio: upstream Android audio backend.
+- Android rendering: upstream JNI and Android surface integration.
+- Touch controls: upstream on-screen PSP controller.
+- External controllers: upstream Android key and joystick event handling.
+- Disc images: upstream supported PSP image loaders, including ISO/CSO.
 
-## Core candidate
-
-Evaluate the upstream PPSSPP C++ core as the PSP implementation rather than writing a fake interpreter or claiming that a file scanner is an emulator. Before importing or modifying that code:
-
-- Review and follow its GPL-2.0-or-later license.
-- Preserve copyright and license notices and provide corresponding source for distributed modifications.
-- Review the upstream contribution and AI-use policy before generating or submitting changes to that code.
-- Keep proprietary game images out of this repository and APK.
-
-Core integration must connect real CPU execution, GPU rendering, audio, input, save data, and lifecycle handling to the Android app. Add compatibility tests before enabling the Play action.
+The Android app compiles the PPSSPP `ppsspp_jni` native library from the pinned source. It does not load a separately installed emulator app.
 
 ## Runtime rule
 
-Every Android ABI built by Conshite must package the NDK C++ runtime needed by its native libraries. The initial build selects c++_shared; all future native emulator libraries must use the same shared runtime. CI checks that libc++_shared.so is present for each configured ABI.
+The Android CMake configuration explicitly selects `c++_shared`. All configured ABIs must package both `libppsspp_jni.so` and `libc++_shared.so`. CI verifies arm64-v8a and armeabi-v7a.
+
+## Source and license
+
+- Upstream: https://github.com/hrydgard/ppsspp
+- Pinned release: v1.20.4
+- License: GPL-2.0-or-later
+
+Do not remove upstream copyright notices. Any redistributed modified build must comply with the GPL source and notice requirements.
+
+## Testing boundary
+
+CI proves that the Android app and native emulator library compile and that the C++ runtime is packaged. It does not prove that every game boots or runs at full speed. Commercial game compatibility requires legal test images and real-device testing; no game images are stored in this repository.

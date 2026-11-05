@@ -1,40 +1,64 @@
 # Conshite
 
-**Android GameHub with a PSP-first emulator architecture.**
+**Conshite is an Android PSP GameHub powered by the PPSSPP emulator core.**
 
-Conshite is being built as two connected layers:
+## Current architecture
 
-1. **GameHub (Kotlin + Jetpack Compose):** a local game library, document picker, game metadata, settings, and controller-friendly UI.
-2. **Native engine (C++20 + Android NDK):** the shared runtime and the eventual PSP emulation core.
+Conshite builds the official **PPSSPP v1.20.4** Android frontend and C++ emulator core from the pinned source revision in the `ppsspp` Git submodule.
 
-## Current milestone: 0.1.0 foundation
+- **Android application and GameHub:** Java.
+- **Emulator engine:** C++.
+- **Graphics:** PPSSPP's Android graphics backends (OpenGL ES and Vulkan where the device/driver supports them).
+- **Audio:** PPSSPP's Android audio backend.
+- **Input:** PPSSPP's on-screen PSP controls and Android game-controller input, including compatible Bluetooth controllers.
+- **Game files:** PSP ISO and CSO files, plus supported homebrew formats.
 
-- Android app shell using Kotlin and Jetpack Compose.
-- Import and remember user-selected PSP ISO/CSO document URIs.
-- C++20 JNI library built for arm64-v8a and armeabi-v7a.
-- Explicit Android NDK shared C++ runtime selection (c++_shared).
-- GitHub Actions builds a debug APK and checks that libc++_shared.so is packaged for both configured ABIs.
+The upstream Android project already connects its Java activity, native JNI layer, graphics surface, audio callbacks, and controller events to the emulator. Conshite does not use a fake CPU loop or a file scanner as an emulator.
 
-**Important:** the PSP emulator core is not integrated yet. The app can catalogue selected files, but it cannot run games at this milestone. The Play control stays disabled rather than pretending emulation works.
+## Native runtime is mandatory
 
-## Console scope
+Every packaged ABI uses the Android NDK shared C++ runtime:
 
-The first target is **PlayStation Portable (PSP)**, matching the PPSSPP-style brief and ISO/CSO formats. This does not mean PS1, PS2, Xbox, Nintendo, or every console format is supported.
+- `-DANDROID_STL=c++_shared`
+- `lib/arm64-v8a/libc++_shared.so`
+- `lib/armeabi-v7a/libc++_shared.so`
 
-The planned PSP core candidate is the upstream PPSSPP C++ project. Its source is GPL-2.0-or-later, so integration and distribution must preserve license notices and provide corresponding source for distributed modifications. Review its upstream AI-use/contribution policy before working inside that code.
-
-## Runtime guarantee
-
-Every configured Android ABI must include the Android NDK C++ runtime required by native libraries. The initial project uses c++_shared because the emulator integration is expected to involve multiple native shared libraries. CI checks that libc++_shared.so is present for each configured ABI.
-
-Do not mix different C++ runtime variants across native libraries. Any future native emulator library must use the same shared C++ runtime and remain covered by the APK runtime verification step.
-
-## Games and files
-
-Conshite does not bundle commercial game files. Add only game files you are entitled to use and homebrew titles. The repository contains no ROM/ISO/CSO images.
+GitHub Actions fails the build if either the PPSSPP native library (`libppsspp_jni.so`) or the matching `libc++_shared.so` is missing for either ABI. Future native libraries must use the same shared C++ runtime.
 
 ## Build
 
-Open the repository in Android Studio with Android SDK Platform 36, NDK 28.2.13676358, CMake 3.22.1, and JDK 17. The GitHub Actions workflow builds the debug APK automatically on pushes and pull requests to main.
+Clone with submodules enabled:
 
-See [core/README.md](core/README.md) for the PSP-core integration gate.
+```bash
+git clone --recurse-submodules https://github.com/akaswising-ui/Conshite.git
+```
+
+Build requirements:
+
+- JDK 17
+- Android SDK Platform 36
+- Android NDK 29.0.14206865
+- CMake 3.22.1
+- Gradle 9.4.1
+
+Build the debug APK:
+
+```bash
+gradle --no-daemon :app:assembleNormalDebug
+```
+
+The APK is created under `app/build/outputs/apk/normal/debug/`.
+
+## Compatibility and device testing
+
+The emulator core is integrated, but compatibility is not universal. Performance and compatibility vary by game, Android device, graphics driver, and settings. The CI build verifies native compilation and runtime packaging; it does not claim that every commercial game has been tested.
+
+Test only game images you are legally entitled to use or homebrew titles. No commercial game files are included in this repository or APK. Record real-device results in [core/COMPATIBILITY.md](core/COMPATIBILITY.md).
+
+## Languages and third-party notices
+
+Conshite's Android integration layer is Java and its emulator engine is C++. The pinned upstream PPSSPP source also contains third-party C support libraries and build configuration files; those are retained as upstream dependencies rather than rewritten.
+
+PPSSPP is licensed under **GPL-2.0-or-later**. Keep its copyright/license notices with source and distributed builds, and provide the corresponding source for any distributed modifications as required by the license. Conshite is not affiliated with or endorsed by Sony. “PSP” is a Sony trademark.
+
+AI-assisted changes in this repository must be reviewed and tested by the project maintainer before distribution. No AI-generated changes are submitted to the PPSSPP upstream project by this integration.
