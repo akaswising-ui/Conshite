@@ -1,5 +1,8 @@
 package com.akaswising.conshite;
 
+import com.chaquo.python.Python;
+import com.chaquo.python.android.AndroidPlatform;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -53,8 +56,11 @@ public final class MainActivity extends AppCompatActivity {
     private TextView heroSubtitle;
     private ImageView heroCover;
     private Button heroPlay;
+    private Button detailsButton;
+    private Button coverButton;
     private Button addGameButton;
     private TextView runtimeText;
+    private boolean pythonRuntimeReady;
 
     private int selectedGame = -1;
     private ActivityResultLauncher<String[]> gamePicker;
@@ -64,6 +70,7 @@ public final class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         loadGames();
+        initializePythonRuntime();
 
         gamePicker = registerForActivityResult(
             new ActivityResultContracts.OpenDocument(),
@@ -74,9 +81,20 @@ public final class MainActivity extends AppCompatActivity {
             this::onCoverPicked
         );
 
-        if (games.length() > 0) selectedGame = 0;
         buildDashboard();
         renderDashboard();
+    }
+
+    private void initializePythonRuntime() {
+        try {
+            if (!Python.isStarted()) {
+                Python.start(new AndroidPlatform(getApplicationContext()));
+            }
+            Python.getInstance().getModule("conshite_runtime").callAttr("runtime_info");
+            pythonRuntimeReady = true;
+        } catch (Exception error) {
+            pythonRuntimeReady = false;
+        }
     }
 
     @Override
@@ -162,13 +180,13 @@ public final class MainActivity extends AppCompatActivity {
         heroPlay.setOnClickListener(v -> playSelectedGame());
         actionRow.addView(heroPlay, new LinearLayout.LayoutParams(0, dp(44), 1));
 
-        Button detailsButton = actionButton("VIEW DETAILS");
+        detailsButton = actionButton("VIEW DETAILS");
         detailsButton.setOnClickListener(v -> showSelectedDetails());
         LinearLayout.LayoutParams detailsParams = new LinearLayout.LayoutParams(0, dp(44), 1);
         detailsParams.leftMargin = dp(8);
         actionRow.addView(detailsButton, detailsParams);
 
-        Button coverButton = actionButton("SET COVER");
+        coverButton = actionButton("SET COVER");
         coverButton.setOnClickListener(v -> chooseCover());
         LinearLayout.LayoutParams coverParams = new LinearLayout.LayoutParams(0, dp(44), 1);
         coverParams.leftMargin = dp(8);
@@ -207,11 +225,17 @@ public final class MainActivity extends AppCompatActivity {
     private void renderDashboard() {
         if (carousel == null) return;
         carousel.removeAllViews();
-        boolean runtimeReady = PpssppActivity.libraryLoaded;
-        runtimeText.setText(runtimeReady ? "● PSP RUNTIME READY" : "● PSP RUNTIME NOT LOADED");
+        boolean hasSelectedGame = selectedGame >= 0 && selectedGame < games.length();
+        boolean runtimeReady = PpssppActivity.libraryLoaded && pythonRuntimeReady;
+        runtimeText.setText(runtimeReady
+            ? "● PYTHON CONTROL + PSP CORE READY"
+            : (pythonRuntimeReady ? "● PSP CORE NOT LOADED" : "● PYTHON CONTROLLER NOT READY"));
         runtimeText.setTextColor(runtimeReady
             ? Color.rgb(112, 220, 157) : Color.rgb(255, 166, 112));
-        heroPlay.setEnabled(runtimeReady && selectedGame >= 0 && selectedGame < games.length());
+        heroPlay.setVisibility(hasSelectedGame ? View.VISIBLE : View.GONE);
+        heroPlay.setEnabled(runtimeReady && hasSelectedGame);
+        detailsButton.setVisibility(hasSelectedGame ? View.VISIBLE : View.GONE);
+        coverButton.setVisibility(hasSelectedGame ? View.VISIBLE : View.GONE);
 
         if (games.length() == 0) {
             heroTitle.setText("Your game library");
@@ -225,15 +249,21 @@ public final class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (selectedGame < 0 || selectedGame >= games.length()) selectedGame = 0;
-        JSONObject selected = games.optJSONObject(selectedGame);
-        if (selected != null) {
-            String name = selected.optString("name", "Unknown PSP game");
-            heroTitle.setText(name);
-            heroSubtitle.setText("PLAYSTATION PORTABLE  •  " +
-                selected.optString("format", "ISO") + "  •  " +
-                formatSize(selected.optLong("size", 0)));
-            setCoverOnView(heroCover, selected.optString("coverPath", ""), name, 112, 112);
+        if (!hasSelectedGame) {
+            heroTitle.setText("Select a game");
+            heroSubtitle.setText("Choose a title below. Its PLAY button will appear here.");
+            heroCover.setImageDrawable(null);
+            heroCover.setBackground(roundBackground(Color.rgb(28, 48, 67), 14));
+        } else {
+            JSONObject selected = games.optJSONObject(selectedGame);
+            if (selected != null) {
+                String name = selected.optString("name", "Unknown PSP game");
+                heroTitle.setText(name);
+                heroSubtitle.setText("PLAYSTATION PORTABLE  •  " +
+                    selected.optString("format", "ISO") + "  •  " +
+                    formatSize(selected.optLong("size", 0)));
+                setCoverOnView(heroCover, selected.optString("coverPath", ""), name, 112, 112);
+            }
         }
 
         for (int i = 0; i < games.length(); i++) {
@@ -423,6 +453,14 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void playSelectedGame() {
+        if (selectedGame < 0 || selectedGame >= games.length()) {
+            Toast.makeText(this, "Select a game first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!pythonRuntimeReady || !PpssppActivity.libraryLoaded) {
+            Toast.makeText(this, "Python controller or PSP core is not ready.", Toast.LENGTH_LONG).show();
+            return;
+        }
         JSONObject game = games.optJSONObject(selectedGame);
         if (game == null) return;
         String path = game.optString("path", "");
@@ -430,9 +468,13 @@ public final class MainActivity extends AppCompatActivity {
         try {
             Uri gameUri;
             if (!path.isEmpty()) {
-                File file = new File(path);
+                String launchJson = Python.getInstance()
+                    .getModule("conshite_runtime")
+                    .callAttr("prepare_game", path).toString();
+                JSONObject launchData = new JSONObject(launchJson);
+                File file = new File(launchData.getString("path"));
                 if (!file.isFile() || !file.canRead()) {
-                    Toast.makeText(this, "Game file is missing. Import it again.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Python runtime could not read the game file.", Toast.LENGTH_LONG).show();
                     return;
                 }
                 gameUri = Uri.fromFile(file);
@@ -445,7 +487,7 @@ public final class MainActivity extends AppCompatActivity {
 
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setClass(this, PpssppActivity.class);
-            intent.setDataAndType(gameUri, "*/*");
+            intent.setDataAndType(gameUri, "application/octet-stream");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
         } catch (Exception error) {
