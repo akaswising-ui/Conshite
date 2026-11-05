@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'com.google.protobuf'
+    id 'com.chaquo.python'
 }
 
 android {
@@ -12,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId 'com.akaswising.conshite'
-        minSdk 21
+        minSdk 24
         targetSdk 36
         versionCode 120401
         versionName '1.20.4-conshite.2'
@@ -81,6 +82,13 @@ android {
     buildFeatures {
         aidl true
         buildConfig true
+    }
+}
+
+chaquopy {
+    defaultConfig {
+        version = "3.11"
+        buildPython("python3.11")
     }
 }
 
