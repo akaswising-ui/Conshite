@@ -42,12 +42,12 @@ replace_once(
 replace_once(
     NATIVE_APP,
     '''\t} else {
-\t\tINFO_LOG(Log::System, "No memstick directory file found (tried to open '%s')", memStickDirFile.c_str());
+\t\tINFO_LOG(Log::System, "No memstick directory file found (tried to open '%s')", memstickDirFile.c_str());
 \t}
 
 \t// Attempt to create directories after reading the path.''',
     '''\t} else {
-\t\tINFO_LOG(Log::System, "No memstick directory file found (tried to open '%s')", memStickDirFile.c_str());
+\t\tINFO_LOG(Log::System, "No memstick directory file found (tried to open '%s')", memstickDirFile.c_str());
 \t}
 
 \tif (g_Config.memStickDirectory.empty()) {
