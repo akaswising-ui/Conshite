@@ -145,7 +145,7 @@ public final class MainActivity extends AppCompatActivity {
         topBar.setGravity(Gravity.CENTER_VERTICAL);
         page.addView(topBar);
 
-        TextView brand = text("☰   CONSHITE   /   DASHBOARD", 14, true, Color.WHITE);
+        TextView brand = text("☰   CONSHITE   /   GAME LIBRARY", 14, true, Color.WHITE);
         topBar.addView(brand, new LinearLayout.LayoutParams(0, dp(44), 1));
 
         Button searchButton = smallButton("⌕");
@@ -159,7 +159,7 @@ public final class MainActivity extends AppCompatActivity {
         topBar.addView(menuButton);
 
         runtimeText = text(
-            PpssppActivity.libraryLoaded ? "● PSP RUNTIME READY" : "● PSP RUNTIME NOT LOADED",
+            PpssppActivity.libraryLoaded ? "● GAME ENGINE READY" : "● GAME ENGINE NOT READY",
             10, true,
             PpssppActivity.libraryLoaded ? Color.rgb(112, 220, 157) : Color.rgb(255, 166, 112)
         );
@@ -194,7 +194,7 @@ public final class MainActivity extends AppCompatActivity {
 
         heroTitle = text("Your game library", 22, true, Color.WHITE);
         heroText.addView(heroTitle);
-        heroSubtitle = text("Add a PSP ISO or CSO to get started.", 12, false,
+        heroSubtitle = text("Add an ISO or CSO game file to get started.", 12, false,
             Color.rgb(188, 202, 218));
         addTopMargin(heroText, heroSubtitle, 7);
 
@@ -224,7 +224,7 @@ public final class MainActivity extends AppCompatActivity {
         libraryHeader.setGravity(Gravity.CENTER_VERTICAL);
         addTopMargin(page, libraryHeader, 22);
 
-        TextView libraryTitle = text("MY GAMES", 16, true, Color.WHITE);
+        TextView libraryTitle = text("GAME LIBRARY", 16, true, Color.WHITE);
         libraryHeader.addView(libraryTitle, new LinearLayout.LayoutParams(0, dp(42), 1));
 
         addGameButton = actionButton("+  ADD GAME");
@@ -247,6 +247,9 @@ public final class MainActivity extends AppCompatActivity {
         addTopMargin(page, note, 12);
 
         setContentView(outer);
+        hero.setAlpha(0f);
+        hero.setTranslationY(dp(14));
+        hero.animate().alpha(1f).translationY(0f).setDuration(380L).start();
     }
 
     private void renderDashboard() {
@@ -255,10 +258,10 @@ public final class MainActivity extends AppCompatActivity {
         boolean hasSelectedGame = selectedGame >= 0 && selectedGame < games.length();
         boolean runtimeReady = PpssppActivity.libraryLoaded && pythonRuntimeReady && nativeRuntimeReady;
         runtimeText.setText(runtimeReady
-            ? "● PYTHON + CONSHITE C++ + PSP CORE READY"
+            ? "● GAME ENGINE READY"
             : (!pythonRuntimeReady ? "● PYTHON CONTROLLER NOT READY"
-                : (!nativeRuntimeReady ? "● CONSHITE C++ RUNTIME NOT LOADED"
-                    : "● PSP CORE NOT LOADED")));
+                : (!nativeRuntimeReady ? "● DISPLAY SERVICE NOT READY"
+                    : "● GAME ENGINE NOT READY")));
         runtimeText.setTextColor(runtimeReady
             ? Color.rgb(112, 220, 157) : Color.rgb(255, 166, 112));
         heroPlay.setVisibility(hasSelectedGame ? View.VISIBLE : View.GONE);
@@ -268,7 +271,7 @@ public final class MainActivity extends AppCompatActivity {
 
         if (games.length() == 0) {
             heroTitle.setText("Your game library");
-            heroSubtitle.setText("Add a PSP ISO or CSO to get started.");
+            heroSubtitle.setText("Add an ISO or CSO game file to get started.");
             heroCover.setImageDrawable(null);
             heroCover.setBackground(roundBackground(Color.rgb(28, 48, 67), 14));
             TextView empty = text("No games imported yet. Tap + ADD GAME.", 13, false,
@@ -286,9 +289,9 @@ public final class MainActivity extends AppCompatActivity {
         } else {
             JSONObject selected = games.optJSONObject(selectedGame);
             if (selected != null) {
-                String name = selected.optString("name", "Unknown PSP game");
+                String name = selected.optString("name", "Unknown game");
                 heroTitle.setText(name);
-                heroSubtitle.setText("PLAYSTATION PORTABLE  •  " +
+                heroSubtitle.setText("GAME IMAGE  •  " +
                     selected.optString("format", "ISO") + "  •  " +
                     formatSize(selected.optLong("size", 0)));
                 setCoverOnView(heroCover, selected.optString("coverPath", ""), name, 112, 112);
@@ -299,7 +302,7 @@ public final class MainActivity extends AppCompatActivity {
             JSONObject game = games.optJSONObject(i);
             if (game == null) continue;
             final int index = i;
-            String name = game.optString("name", "PSP Game");
+            String name = game.optString("name", "Game");
 
             LinearLayout tile = new LinearLayout(this);
             tile.setOrientation(LinearLayout.VERTICAL);
@@ -312,6 +315,12 @@ public final class MainActivity extends AppCompatActivity {
                 new LinearLayout.LayoutParams(dp(116), dp(134));
             tileParams.rightMargin = dp(9);
             carousel.addView(tile, tileParams);
+            tile.setAlpha(0f);
+            tile.setTranslationY(dp(10));
+            tile.setScaleX(i == selectedGame ? 1.02f : 1f);
+            tile.setScaleY(i == selectedGame ? 1.02f : 1f);
+            tile.animate().alpha(1f).translationY(0f)
+                .setStartDelay(Math.min(i * 42L, 250L)).setDuration(250L).start();
 
             ImageView cover = new ImageView(this);
             cover.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -326,8 +335,10 @@ public final class MainActivity extends AppCompatActivity {
             tile.addView(label, labelParams);
 
             tile.setOnClickListener(v -> {
-                selectedGame = index;
-                renderDashboard();
+                v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(70L).withEndAction(() -> {
+                    selectedGame = index;
+                    renderDashboard();
+                }).start();
             });
             tile.setOnLongClickListener(v -> {
                 selectedGame = index;
@@ -344,7 +355,7 @@ public final class MainActivity extends AppCompatActivity {
         String extension = dot >= 0
             ? name.substring(dot + 1).toLowerCase(Locale.ROOT) : "";
         if (!extension.equals("iso") && !extension.equals("cso")) {
-            Toast.makeText(this, "Choose a PSP .iso or .cso file.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Choose a supported .iso or .cso game file.", Toast.LENGTH_LONG).show();
             return;
         }
         if (containsSource(uri.toString())) {
@@ -415,7 +426,7 @@ public final class MainActivity extends AppCompatActivity {
                     Toast.makeText(this,
                         finalCover.isEmpty()
                             ? "Game added. Use SET COVER to choose its artwork."
-                            : "Game added with its embedded PSP icon.",
+                            : "Game added with its embedded artwork.",
                         Toast.LENGTH_LONG).show();
                 } catch (Exception error) {
                     finalImported.delete();
@@ -487,7 +498,7 @@ public final class MainActivity extends AppCompatActivity {
             return;
         }
         if (!pythonRuntimeReady || !nativeRuntimeReady || !PpssppActivity.libraryLoaded) {
-            Toast.makeText(this, "Python controller, Conshite C++ bridge, or PSP core is not ready.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "The game engine is not ready. Close and reopen Conshite, then try again.", Toast.LENGTH_LONG).show();
             return;
         }
         JSONObject game = games.optJSONObject(selectedGame);
@@ -514,7 +525,7 @@ public final class MainActivity extends AppCompatActivity {
                     || !"C++".equals(implementation)
                     || !ConshitePpssppActivity.class.getName().equals(targetActivity)
                     || !surfaceHost.contains("SurfaceView")) {
-                    throw new IllegalStateException("Python display contract does not match the bundled C++ PSP renderer.");
+                    throw new IllegalStateException("The display contract does not match the bundled game engine.");
                 }
 
                 File file = new File(launchData.getString("path"));
@@ -594,17 +605,26 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void showMenu() {
-        String[] options = {"Add PSP game", "Set selected game cover", "Game library info"};
+        String[] options = {"Add game file", "Set selected game cover", "Game library info", "About & licenses"};
         new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Conshite menu")
+            .setTitle("Conshite")
             .setItems(options, (dialog, which) -> {
                 if (which == 0) gamePicker.launch(new String[]{"*/*"});
                 else if (which == 1) chooseCover();
-                else new androidx.appcompat.app.AlertDialog.Builder(this)
+                else if (which == 2) new androidx.appcompat.app.AlertDialog.Builder(this)
                     .setTitle("Game library")
-                    .setMessage(games.length() + " game(s) imported. Game files and cover images are stored inside Conshite.")
+                    .setMessage(games.length() + " game(s) imported. Your game files and cover images are stored inside Conshite.")
                     .setPositiveButton("OK", null).show();
+                else showAboutDialog();
             }).show();
+    }
+
+    private void showAboutDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("About & licenses")
+            .setMessage("Conshite is independently branded. It includes the PPSSPP emulator core, licensed under GNU GPL v2 or later. Conshite is not affiliated with or endorsed by Sony Interactive Entertainment. No commercial game files are included. Use only game images you are legally entitled to use. Third-party notices and corresponding source are available in the project repository.")
+            .setPositiveButton("CLOSE", null)
+            .show();
     }
 
     private void setCoverOnView(ImageView view, String path, String name, int width, int height) {
