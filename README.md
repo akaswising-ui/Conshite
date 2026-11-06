@@ -18,9 +18,9 @@ The Java GameHub imports PSP ISO/CSO files into app-private storage. When a user
 
 **Phone display path:** PPSSPP's Android activity creates the graphics surface. Its native JNI renderer connects that surface to the PPSSPP C++ graphics/emulation engine, which draws PSP frames on the Android screen. Java hosts the Android lifecycle and surface object; it does not emulate or draw PSP frames. Python controls validation and launch hand-off; it does not generate video frames. This avoids adding a second renderer beside the real emulator.
 
-## Native runtime is mandatory
+## Android native dependencies are mandatory
 
-Every packaged ABI must include the Android NDK shared C++ runtime:
+Every packaged ABI must include the Android NDK C++ standard-library dependency (this is not the CI Runtime product name):
 
 - `-DANDROID_STL=c++_shared`
 - `lib/arm64-v8a/libc++_shared.so`
@@ -58,10 +58,10 @@ Conshite's own Android application code is Java and its native integration/emula
 PPSSPP is GPL-2.0-or-later. Preserve copyright and license notices and provide corresponding source for distributed modifications as required by that license. Conshite is not affiliated with or endorsed by Sony.
 
 
-## Conshite-owned C++ runtime
+## CI Runtime integration in Conshite
 
 In addition to the upstream PPSSPP C++ emulator submodule, Conshite now includes its own Android native module: `conshite-native`. It builds `libconshite_native.so` with C++17, JNI, Android NDK, and CMake for arm64-v8a and armeabi-v7a.
 
 The native module probes ISO9660/CSO file structure, validates the Python-to-Android renderer hand-off, tracks a thread-safe display-session lifecycle, and attaches an `ANativeWindow` reference to the same `SurfaceView` used by the PPSSPP Android Activity. The C++ surface bridge reports surface attach/detach and dimensions. PPSSPP's own native renderer remains responsible for producing and displaying PSP frames.
 
-The application path is Python control -> Java Android Activity/lifecycle -> Conshite C++17 validation/session/surface bridge -> PPSSPP C++ renderer. See [the native runtime notes](docs/CONSHITE-NATIVE-CPP-RUNTIME.md).
+The application path is CI Runtime game adapter (Python 3.11) -> Java Android Activity/lifecycle -> CI Runtime native adapter (C++17) -> PPSSPP C++ renderer. The runtime identity is CI Runtime; the listed languages are implementation details. See [CI Runtime architecture](docs/CI_RUNTIME.md).
