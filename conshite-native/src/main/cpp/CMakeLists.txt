@@ -5,6 +5,7 @@ add_library(conshite_native SHARED
     jni_bridge.cpp
     display_session.cpp
     image_probe.cpp
+    native_surface_bridge.cpp
 )
 
 target_include_directories(conshite_native PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -13,5 +14,5 @@ target_compile_options(conshite_native PRIVATE
     -Wall -Wextra -Wpedantic -fvisibility=hidden
 )
 
-find_library(android-log log)
-target_link_libraries(conshite_native PRIVATE ${android-log})
+find_library(ANDROID_LIBRARY android)
+target_link_libraries(conshite_native PRIVATE ${ANDROID_LIBRARY})
