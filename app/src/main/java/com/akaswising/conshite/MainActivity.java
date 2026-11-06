@@ -165,7 +165,7 @@ public final class MainActivity extends AppCompatActivity {
         topBar.addView(menuButton);
 
         runtimeText = text(
-            PpssppActivity.libraryLoaded ? "● GAME ENGINE READY" : "● GAME ENGINE NOT READY",
+            PpssppActivity.libraryLoaded ? "● CI RUNTIME CHECKING" : "● CI RUNTIME ENGINE NOT READY",
             10, true,
             PpssppActivity.libraryLoaded ? Color.rgb(112, 220, 157) : Color.rgb(255, 166, 112)
         );
@@ -265,10 +265,10 @@ public final class MainActivity extends AppCompatActivity {
         boolean hasSelectedGame = selectedGame >= 0 && selectedGame < games.length();
         boolean runtimeReady = PpssppActivity.libraryLoaded && pythonRuntimeReady && nativeRuntimeReady;
         runtimeText.setText(runtimeReady
-            ? "● GAME ENGINE READY"
-            : (!pythonRuntimeReady ? "● PYTHON CONTROLLER NOT READY"
-                : (!nativeRuntimeReady ? "● CONSHITE C++ RUNTIME NOT LOADED"
-                    : "● GAME ENGINE NOT READY")));
+            ? "● CI RUNTIME READY"
+            : (!pythonRuntimeReady ? "● CI RUNTIME CORE NOT READY"
+                : (!nativeRuntimeReady ? "● CI RUNTIME NATIVE MODULE NOT LOADED"
+                    : "● PSP ENGINE NOT READY")));
         runtimeText.setTextColor(runtimeReady
             ? Color.rgb(112, 220, 157) : Color.rgb(255, 166, 112));
         heroPlay.setVisibility(hasSelectedGame ? View.VISIBLE : View.GONE);
@@ -565,13 +565,14 @@ public final class MainActivity extends AppCompatActivity {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             if (displaySession != null) {
                 // Explicit diagnostic hand-off: Python -> Android host -> C++ engine.
-                intent.putExtra("conshite.runtime.control", "Python");
+                intent.putExtra("conshite.runtime.name", "CI Runtime");
+                intent.putExtra("conshite.runtime.control_implementation", "Python 3.11");
                 intent.putExtra("conshite.display.engine", displaySession.optString("engine"));
                 intent.putExtra("conshite.display.native_library", displaySession.optString("native_library"));
                 intent.putExtra("conshite.display.language", displaySession.optString("implementation_language"));
                 intent.putExtra("conshite.display.surface", displaySession.optString("surface_host"));
                 intent.putExtra("conshite.cpp.session_id", cppSessionId);
-                intent.putExtra("conshite.cpp.runtime", "conshite_native");
+                intent.putExtra("conshite.ci.native_module", "conshite_native");
             }
             startActivity(intent);
             if (cppSessionId != null
