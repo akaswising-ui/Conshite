@@ -123,7 +123,7 @@ bool ProbeGameImage(const std::string& path, std::uint64_t expectedSize,
         return Fail(error, "Game image size changed after Python validation.");
 
     std::ifstream file(path, std::ios::binary);
-    if (!file.is_open()) return Fail(error, "C++ runtime could not open the game image.");
+    if (!file.is_open()) return Fail(error, "CI Runtime native adapter could not open the game image.");
     const std::string ext = Extension(path);
     if (ext == ".iso") return ProbeIso(file, actualSize, info, error);
     if (ext == ".cso") return ProbeCso(file, actualSize, info, error);
