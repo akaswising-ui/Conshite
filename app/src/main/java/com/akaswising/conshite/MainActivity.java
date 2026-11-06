@@ -512,7 +512,7 @@ public final class MainActivity extends AppCompatActivity {
                 String surfaceHost = displaySession.optString("surface_host", "");
                 if (!"ppsspp_jni".equals(nativeLibrary)
                     || !"C++".equals(implementation)
-                    || !PpssppActivity.class.getName().equals(targetActivity)
+                    || !ConshitePpssppActivity.class.getName().equals(targetActivity)
                     || !surfaceHost.contains("SurfaceView")) {
                     throw new IllegalStateException("Python display contract does not match the bundled C++ PSP renderer.");
                 }
@@ -549,7 +549,7 @@ public final class MainActivity extends AppCompatActivity {
             }
 
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setClass(this, PpssppActivity.class);
+            intent.setClass(this, ConshitePpssppActivity.class);
             intent.setDataAndType(gameUri, "application/octet-stream");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             if (displaySession != null) {
