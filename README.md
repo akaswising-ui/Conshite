@@ -56,3 +56,12 @@ Use homebrew or game images you are legally entitled to use. No commercial game 
 Conshite's own Android application code is Java and its native integration/emulator code is C++. The upstream PPSSPP source contains supporting C libraries; these remain unchanged upstream dependencies.
 
 PPSSPP is GPL-2.0-or-later. Preserve copyright and license notices and provide corresponding source for distributed modifications as required by that license. Conshite is not affiliated with or endorsed by Sony.
+
+
+## Conshite-owned C++ runtime
+
+In addition to the upstream PPSSPP C++ emulator submodule, Conshite now includes its own Android native module: `conshite-native`. It builds `libconshite_native.so` with C++17, JNI, Android NDK, and CMake for arm64-v8a and armeabi-v7a.
+
+The native module probes ISO9660/CSO file structure, validates the Python-to-Android renderer hand-off, tracks a thread-safe display-session lifecycle, and attaches an `ANativeWindow` reference to the same `SurfaceView` used by the PPSSPP Android Activity. The C++ surface bridge reports surface attach/detach and dimensions. PPSSPP's own native renderer remains responsible for producing and displaying PSP frames.
+
+The application path is Python control -> Java Android Activity/lifecycle -> Conshite C++17 validation/session/surface bridge -> PPSSPP C++ renderer. See [the native runtime notes](docs/CONSHITE-NATIVE-CPP-RUNTIME.md).
