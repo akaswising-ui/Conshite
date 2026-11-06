@@ -33,3 +33,8 @@ Do not remove upstream copyright notices. Distributed modified builds must compl
 ## Testing boundary
 
 CI proves native compilation and Android packaging only. It does not prove that every game boots or runs at full speed. Record actual results in [the compatibility test plan](../docs/PSP-COMPATIBILITY-TESTING.md). No game images are stored in this repository.
+
+
+## Conshite-owned native C++ module
+
+The app also builds `conshite-native` as `libconshite_native.so`. Its C++17 code probes ISO9660/CSO structure, validates the Python -> Java -> PPSSPP launch contract, maintains the native display-session state machine, and retains/monitors an `ANativeWindow` reference obtained from the Conshite PPSSPP Activity's SurfaceHolder callbacks. PPSSPP's renderer still draws the game frames; the Conshite surface bridge does not replace or interfere with its graphics backend.
