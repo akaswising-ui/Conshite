@@ -376,7 +376,7 @@ public final class MainActivity extends AppCompatActivity {
                 if (!directory.exists() && !directory.mkdirs())
                     throw new java.io.IOException("Could not create the private game folder.");
                 String safeName = name.replaceAll("[^A-Za-z0-9._-]", "_");
-                if (safeName.isEmpty()) safeName = "PSP_Game." + extension;
+                if (safeName.isEmpty()) safeName = "Conshite_Game." + extension;
                 imported = new File(directory, System.currentTimeMillis() + "_" + safeName);
                 copyUriToFile(uri, imported);
 
@@ -426,7 +426,7 @@ public final class MainActivity extends AppCompatActivity {
                     Toast.makeText(this,
                         finalCover.isEmpty()
                             ? "Game added. Use SET COVER to choose its artwork."
-                            : "Game added with its embedded PSP icon.",
+                            : "Game added with its embedded artwork.",
                         Toast.LENGTH_LONG).show();
                 } catch (Exception error) {
                     finalImported.delete();
@@ -525,7 +525,7 @@ public final class MainActivity extends AppCompatActivity {
                     || !"C++".equals(implementation)
                     || !ConshitePpssppActivity.class.getName().equals(targetActivity)
                     || !surfaceHost.contains("SurfaceView")) {
-                    throw new IllegalStateException("Python display contract does not match the bundled C++ PSP renderer.");
+                    throw new IllegalStateException("The display contract does not match the bundled game engine.");
                 }
 
                 File file = new File(launchData.getString("path"));
@@ -621,7 +621,7 @@ public final class MainActivity extends AppCompatActivity {
                 } else {
                     new androidx.appcompat.app.AlertDialog.Builder(this)
                         .setTitle("Open-source notices")
-                        .setMessage("Conshite includes the PPSSPP game-emulation engine, licensed under GNU GPL version 2 or later. PPSSPP is an independent open-source project. Its copyright notices, license terms and corresponding source code must remain available with distributions of this app. Conshite's interface and branding are separate.")
+                        .setMessage("Conshite includes third-party open-source engine components licensed under GNU GPL version 2 or later. The required copyright notices, license terms and corresponding source code remain available with this app distribution. Conshite's interface and branding are separate.")
                         .setPositiveButton("OK", null).show();
                 }
             }).show();
@@ -688,7 +688,7 @@ public final class MainActivity extends AppCompatActivity {
             if (cursor != null) cursor.close();
         }
         String last = uri.getLastPathSegment();
-        return last == null ? "PSP_Game.iso" : last;
+        return last == null ? "Conshite_Game.iso" : last;
     }
 
     private boolean containsSource(String source) {
