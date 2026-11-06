@@ -12,7 +12,11 @@ Conshite pins the upstream PPSSPP **v1.20.4** source as the `ppsspp` Git submodu
 - External controllers: upstream Android key and joystick event handling.
 - Disc images: upstream supported PSP loaders, including ISO and CSO.
 
-The Java GameHub presents a Play action after a library item is selected. Java calls the embedded Python 3.11 controller (`app/src/main/python/conshite_runtime.py`) to validate the selected ISO/CSO path and prepare launch metadata. Java then explicitly launches the bundled `PpssppActivity`. Python is the game-launch controller, not the PSP emulator engine. The upstream activity handles the native emulator lifecycle, Android graphics surface, touch input, and gamepad input.
+## Python-to-C++ display path
+
+The Java GameHub calls the embedded Python 3.11 controller (`app/src/main/python/conshite_runtime.py`). Python validates the selected ISO/CSO and returns a display-session contract containing the native library name, C++ implementation, Android activity, and surface host. Java verifies that contract and launches the bundled `PpssppActivity` with the game URI.
+
+The phone's PSP picture is rendered by PPSSPP's native C++ graphics path. The Android activity owns the required `SurfaceView`/`GLSurfaceView` lifecycle and connects it to the native renderer through JNI. The C++ emulator produces the frames; Python is the launch/control runtime, not a software video renderer.
 
 ## Runtime rule
 

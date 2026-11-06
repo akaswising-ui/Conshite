@@ -1,7 +1,7 @@
-"""Python game-launch controller for Conshite.
+"""Python control runtime for the Conshite PSP display pipeline.
 
-This module validates imported PSP image files and prepares a launch descriptor.
-PSP CPU/GPU/audio emulation remains in the bundled native PPSSPP engine.
+Python validates the selected image and describes the native display session.
+The actual PSP emulation and frame rendering remain in PPSSPP's C++ engine.
 """
 from pathlib import Path
 import json
@@ -9,18 +9,33 @@ import platform
 
 _SUPPORTED_FORMATS = {".iso", ".cso"}
 
+_DISPLAY_SESSION = {
+    "engine": "PPSSPP",
+    "native_library": "ppsspp_jni",
+    "implementation_language": "C++",
+    "android_activity": "org.ppsspp.ppsspp.PpssppActivity",
+    "surface_host": "Android SurfaceView/GLSurfaceView",
+    "graphics_backends": ["OpenGL ES", "Vulkan"],
+}
+
+
+def display_session_info():
+    """Return the native C++ renderer and Android display hand-off contract."""
+    return dict(_DISPLAY_SESSION)
+
 
 def runtime_info():
-    """Return machine-readable information about the embedded Python runtime."""
+    """Return machine-readable information about the Python control runtime."""
     return json.dumps({
         "runtime": "Python",
         "version": platform.python_version(),
         "role": "game-launch-controller",
+        "display_session": display_session_info(),
     })
 
 
 def prepare_game(game_path):
-    """Validate a local PSP image and return its canonical launch metadata."""
+    """Validate a PSP image and prepare the C++ renderer display-session hand-off."""
     if not isinstance(game_path, str) or not game_path.strip():
         raise ValueError("Game path is empty.")
 
@@ -40,4 +55,5 @@ def prepare_game(game_path):
         "path": str(image),
         "format": image_format[1:].upper(),
         "size": size,
+        "display_session": display_session_info(),
     })

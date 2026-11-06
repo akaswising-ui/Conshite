@@ -246,7 +246,7 @@ public final class MainActivity extends AppCompatActivity {
         boolean hasSelectedGame = selectedGame >= 0 && selectedGame < games.length();
         boolean runtimeReady = PpssppActivity.libraryLoaded && pythonRuntimeReady;
         runtimeText.setText(runtimeReady
-            ? "● PYTHON CONTROL + PSP CORE READY"
+            ? "● PYTHON CONTROL + C++ PSP DISPLAY READY"
             : (pythonRuntimeReady ? "● PSP CORE NOT LOADED" : "● PYTHON CONTROLLER NOT READY"));
         runtimeText.setTextColor(runtimeReady
             ? Color.rgb(112, 220, 157) : Color.rgb(255, 166, 112));
@@ -485,11 +485,26 @@ public final class MainActivity extends AppCompatActivity {
         String oldUri = game.optString("uri", "");
         try {
             Uri gameUri;
+            JSONObject displaySession = null;
             if (!path.isEmpty()) {
                 String launchJson = Python.getInstance()
                     .getModule("conshite_runtime")
                     .callAttr("prepare_game", path).toString();
                 JSONObject launchData = new JSONObject(launchJson);
+                displaySession = launchData.getJSONObject("display_session");
+
+                // Verify Python's hand-off targets the bundled C++ PSP renderer.
+                String nativeLibrary = displaySession.optString("native_library", "");
+                String implementation = displaySession.optString("implementation_language", "");
+                String targetActivity = displaySession.optString("android_activity", "");
+                String surfaceHost = displaySession.optString("surface_host", "");
+                if (!"ppsspp_jni".equals(nativeLibrary)
+                    || !"C++".equals(implementation)
+                    || !PpssppActivity.class.getName().equals(targetActivity)
+                    || !surfaceHost.contains("SurfaceView")) {
+                    throw new IllegalStateException("Python display contract does not match the bundled C++ PSP renderer.");
+                }
+
                 File file = new File(launchData.getString("path"));
                 if (!file.isFile() || !file.canRead()) {
                     Toast.makeText(this, "Python runtime could not read the game file.", Toast.LENGTH_LONG).show();
@@ -507,6 +522,14 @@ public final class MainActivity extends AppCompatActivity {
             intent.setClass(this, PpssppActivity.class);
             intent.setDataAndType(gameUri, "application/octet-stream");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (displaySession != null) {
+                // Explicit diagnostic hand-off: Python -> Android host -> C++ engine.
+                intent.putExtra("conshite.runtime.control", "Python");
+                intent.putExtra("conshite.display.engine", displaySession.optString("engine"));
+                intent.putExtra("conshite.display.native_library", displaySession.optString("native_library"));
+                intent.putExtra("conshite.display.language", displaySession.optString("implementation_language"));
+                intent.putExtra("conshite.display.surface", displaySession.optString("surface_host"));
+            }
             startActivity(intent);
         } catch (Exception error) {
             String detail = error.getMessage() == null

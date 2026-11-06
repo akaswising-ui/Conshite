@@ -14,7 +14,9 @@ Conshite builds the official **PPSSPP v1.20.4** Android frontend and C++ emulato
 - **Input:** PPSSPP touchscreen controls and Android game-controller input, including compatible Bluetooth controllers.
 - **Game files:** PSP ISO and CSO, plus supported homebrew formats.
 
-The Java GameHub imports PSP ISO/CSO files into app-private storage. When a user selects a library tile, the Play action appears in the selected-game panel. Java calls the embedded Python 3.11 controller to validate the file and obtain its canonical path, then launches the bundled PPSSPP Android activity with that image. The upstream Android frontend connects the activity, JNI layer, graphics surface, audio callbacks, and controller events to the native emulator.
+The Java GameHub imports PSP ISO/CSO files into app-private storage. When a user selects a library tile, Java calls the embedded Python 3.11 controller. Python validates the image and returns a display-session contract naming the PPSSPP C++ native library, Android renderer activity, and SurfaceView/GLSurfaceView host. Java verifies that contract and launches the bundled PPSSPP activity with the game image.
+
+**Phone display path:** PPSSPP's Android activity creates the graphics surface. Its native JNI renderer connects that surface to the PPSSPP C++ graphics/emulation engine, which draws PSP frames on the Android screen. Java hosts the Android lifecycle and surface object; it does not emulate or draw PSP frames. Python controls validation and launch hand-off; it does not generate video frames. This avoids adding a second renderer beside the real emulator.
 
 ## Native runtime is mandatory
 
