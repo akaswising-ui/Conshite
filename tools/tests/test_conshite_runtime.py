@@ -11,9 +11,10 @@ import conshite_runtime
 
 
 class ConshiteRuntimeTests(unittest.TestCase):
-    def test_runtime_info_identifies_python_controller_and_cpp_display(self):
+    def test_runtime_info_uses_shared_ci_runtime_identity(self):
         info = json.loads(conshite_runtime.runtime_info())
-        self.assertEqual(info["runtime"], "Python")
+        self.assertEqual(info["runtime"], "CI Runtime")
+        self.assertEqual(info["implementation"].split()[0], "Python")
         self.assertEqual(info["role"], "game-launch-controller")
         self.assertEqual(info["display_session"]["engine"], "PPSSPP")
         self.assertEqual(info["display_session"]["native_library"], "ppsspp_jni")
