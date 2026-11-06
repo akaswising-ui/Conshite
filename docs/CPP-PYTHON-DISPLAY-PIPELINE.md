@@ -1,10 +1,10 @@
-# Conshite C++ PSP display and Python control path
+# CI Runtime Conshite PSP display adapter
 
-## Runtime roles
+## CI Runtime adapter components
 
-- **Python 3.11:** validates the selected ISO/CSO image and returns a display-session contract.
+- **CI Runtime controller (Python 3.11 implementation):** validates the selected ISO/CSO image and returns a display-session contract.
 - **Java Android host:** verifies the contract, starts the PPSSPP activity, and supplies the game URI. Android requires an Activity/View host for its window and surface lifecycle.
-- **C++ PPSSPP engine:** performs PSP emulation and renders video through the native graphics backend.
+- **PPSSPP C++ engine:** performs PSP emulation and renders video through the native graphics backend.
 
 ## Display hand-off
 
@@ -12,7 +12,7 @@
 GameHub selection
       |
       v
-Python 3.11 conshite_runtime.prepare_game()
+CI Runtime adapter: conshite_runtime.prepare_game()
       |  validates file + returns display_session
       v
 Java MainActivity verifies native library/activity/surface contract
@@ -30,7 +30,7 @@ PPSSPP C++ emulator + graphics backend
 PSP frames appear on the Android phone display
 ```
 
-The C++ renderer is the upstream PPSSPP engine bundled as `libppsspp_jni.so`. The Android view is a platform surface host, not a second emulator or a Python-rendered screen. The Python runtime does not produce frames; it controls which game image is validated and handed to the C++ emulator.
+The C++ renderer is the upstream PPSSPP engine bundled as `libppsspp_jni.so`. The Android view is a platform surface host, not a second emulator or a Python-rendered screen. The CI Runtime controller does not produce frames; it controls which game image is validated and handed to the PPSSPP emulator.
 
 ## Verification
 
