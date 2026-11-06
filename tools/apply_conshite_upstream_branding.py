@@ -152,7 +152,7 @@ replace_once(
 )
 replace_once(
     MAIN_SCREEN,
-    """\tvoid GetContentDimensions(const UIContext &dc, float &w, float &h) const override {
+    """\tvoid GetContentDimensions(const UIContext &, float &w, float &h) const override {
 \t\tconst AtlasImage *iconImg = dc.Draw()->GetAtlas()->getImage(GetIconID());
 \t\tw = iconImg->w;
 \t\th = iconImg->h;
@@ -161,6 +161,22 @@ replace_once(
 \t\tw = 144.0f;
 \t\th = 32.0f;
 \t}""",
+)
+replace_once(
+    MAIN_SCREEN,
+    'LogoView(bool portrait, UI::LayoutParams *layoutParams) : UI::AnchorLayout(layoutParams), portrait_(portrait) {}',
+    'LogoView(bool, UI::LayoutParams *layoutParams) : UI::AnchorLayout(layoutParams) {}',
+)
+replace_once(
+    MAIN_SCREEN,
+    """private:
+\tImageID GetIconID() const {
+\t\treturn System_GetPropertyBool(SYSPROP_APP_GOLD) ? ImageID("I_ICON_GOLD") : ImageID("I_ICON");
+\t}
+
+\tconst bool portrait_;
+};""",
+    """};""",
 )
 replace_once(
     MAIN_SCREEN,
