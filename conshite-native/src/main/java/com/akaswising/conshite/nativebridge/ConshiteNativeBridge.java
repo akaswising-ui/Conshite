@@ -3,7 +3,7 @@ package com.akaswising.conshite.nativebridge;
 import android.view.Surface;
 
 /**
- * JNI access to Conshite's own C++17 runtime.
+ * JNI access to the CI Runtime native adapter, implemented in C++17.
  * PPSSPP remains the actual PSP CPU/GPU/audio emulator and frame renderer.
  */
 public final class ConshiteNativeBridge {
@@ -36,7 +36,7 @@ public final class ConshiteNativeBridge {
             String implementationLanguage, String androidActivity,
             String surfaceHost, boolean ppssppLoaded, long expectedSize) {
         if (!AVAILABLE) {
-            return "{\"ok\":false,\"error\":\"Conshite C++ native runtime is unavailable.\"}";
+            return "{\"ok\":false,\"error\":\"CI Runtime native adapter is unavailable.\"}";
         }
         return nativePrepareDisplaySession(
             gamePath, engine, nativeLibrary, implementationLanguage,
