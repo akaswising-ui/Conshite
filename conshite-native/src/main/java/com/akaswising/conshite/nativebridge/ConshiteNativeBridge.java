@@ -1,5 +1,7 @@
 package com.akaswising.conshite.nativebridge;
 
+import android.view.Surface;
+
 /**
  * JNI access to Conshite's own C++17 runtime.
  * PPSSPP remains the actual PSP CPU/GPU/audio emulator and frame renderer.
@@ -59,6 +61,18 @@ public final class ConshiteNativeBridge {
             : "{\"active\":false,\"state\":\"native_runtime_unavailable\"}";
     }
 
+    public static boolean onSurfaceCreated(Surface surface) {
+        return AVAILABLE && nativeOnSurfaceCreated(surface);
+    }
+
+    public static void onSurfaceChanged() {
+        if (AVAILABLE) nativeOnSurfaceChanged();
+    }
+
+    public static void onSurfaceDestroyed() {
+        if (AVAILABLE) nativeOnSurfaceDestroyed();
+    }
+
     private static native String nativeGetBuildInfo();
     private static native String nativePrepareDisplaySession(
         String gamePath, String engine, String nativeLibrary,
@@ -69,4 +83,7 @@ public final class ConshiteNativeBridge {
     private static native void nativeAbortDisplaySession(String reason);
     private static native void nativeEndDisplaySession();
     private static native String nativeGetDisplayState();
+    private static native boolean nativeOnSurfaceCreated(Surface surface);
+    private static native void nativeOnSurfaceChanged();
+    private static native void nativeOnSurfaceDestroyed();
 }
