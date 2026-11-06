@@ -29,6 +29,12 @@ replace_once(
     '*app_nice_name = "Conshite";',
 )
 
+replace_once(
+    NATIVE_APP,
+    '*app_dir_name = "ppsspp";',
+    '*app_dir_name = "conshite";',
+)
+
 # On scoped-storage Android builds, upstream intentionally waits for the user
 # to choose a memory-stick folder. Conshite owns its data directory, so create
 # a private, app-sandboxed path to let direct game launch skip the first-run
