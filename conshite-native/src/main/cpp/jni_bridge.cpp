@@ -1,4 +1,5 @@
 #include "display_session.h"
+#include "native_surface_bridge.h"
 #include <jni.h>
 #include <cstdint>
 #include <string>
@@ -60,6 +61,26 @@ Java_com_akaswising_conshite_nativebridge_ConshiteNativeBridge_nativeGetDisplayS
     json += ",\"engine\":\"" + s.engine + "\"";
     json += ",\"format\":\"" + s.format + "\"";
     json += ",\"image_size_bytes\":" + std::to_string(s.image_size_bytes);
-    json += ",\"generation\":" + std::to_string(s.generation) + "}";
+    json += ",\"generation\":" + std::to_string(s.generation);
+    json += ",\"android_surface\":" + conshite::NativeSurfaceBridge::Instance().SnapshotJson() + "}";
     return ToJava(env, json);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_akaswising_conshite_nativebridge_ConshiteNativeBridge_nativeOnSurfaceCreated(
+    JNIEnv* env, jclass, jobject surface) {
+    return conshite::NativeSurfaceBridge::Instance().Attach(env, surface)
+        ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_akaswising_conshite_nativebridge_ConshiteNativeBridge_nativeOnSurfaceChanged(
+    JNIEnv*, jclass) {
+    conshite::NativeSurfaceBridge::Instance().Refresh();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_akaswising_conshite_nativebridge_ConshiteNativeBridge_nativeOnSurfaceDestroyed(
+    JNIEnv*, jclass) {
+    conshite::NativeSurfaceBridge::Instance().Detach();
 }
