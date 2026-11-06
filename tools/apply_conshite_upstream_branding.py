@@ -152,12 +152,12 @@ replace_once(
 )
 replace_once(
     MAIN_SCREEN,
-    """\tvoid GetContentDimensions(const UIContext &, float &w, float &h) const override {
+    """\tvoid GetContentDimensions(const UIContext &dc, float &w, float &h) const override {
 \t\tconst AtlasImage *iconImg = dc.Draw()->GetAtlas()->getImage(GetIconID());
 \t\tw = iconImg->w;
 \t\th = iconImg->h;
 \t}""",
-    """\tvoid GetContentDimensions(const UIContext &dc, float &w, float &h) const override {
+    """\tvoid GetContentDimensions(const UIContext &, float &w, float &h) const override {
 \t\tw = 144.0f;
 \t\th = 32.0f;
 \t}""",
