@@ -15,7 +15,7 @@ _DISPLAY_SESSION = {
     "conshite_native_library": "conshite_native",
     "native_bridge_class": "com.akaswising.conshite.nativebridge.ConshiteNativeBridge",
     "implementation_language": "C++",
-    "android_activity": "org.ppsspp.ppsspp.PpssppActivity",
+    "android_activity": "com.akaswising.conshite.ConshitePpssppActivity",
     "surface_host": "Android SurfaceView/GLSurfaceView",
     "graphics_backends": ["OpenGL ES", "Vulkan"],
 }
