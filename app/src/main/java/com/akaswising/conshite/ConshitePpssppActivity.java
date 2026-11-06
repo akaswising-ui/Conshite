@@ -21,7 +21,7 @@ public final class ConshitePpssppActivity extends PpssppActivity
     private SurfaceView displayView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         View root = findViewById(android.R.id.content);
         displayView = findSurfaceView(root);
@@ -66,7 +66,7 @@ public final class ConshitePpssppActivity extends PpssppActivity
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         ConshiteNativeBridge.onSurfaceDestroyed();
         super.onDestroy();
     }
