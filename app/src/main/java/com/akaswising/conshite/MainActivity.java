@@ -2,6 +2,7 @@ package com.akaswising.conshite;
 
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
+import com.akaswising.conshite.nativebridge.ConshiteNativeBridge;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -61,6 +62,7 @@ public final class MainActivity extends AppCompatActivity {
     private Button addGameButton;
     private TextView runtimeText;
     private boolean pythonRuntimeReady;
+    private boolean nativeRuntimeReady;
 
     private int selectedGame = -1;
     private ActivityResultLauncher<String[]> gamePicker;
@@ -112,6 +114,13 @@ public final class MainActivity extends AppCompatActivity {
             pythonRuntimeReady = true;
         } catch (Exception error) {
             pythonRuntimeReady = false;
+        }
+        try {
+            JSONObject nativeInfo = new JSONObject(ConshiteNativeBridge.getBuildInfo());
+            nativeRuntimeReady = ConshiteNativeBridge.isAvailable()
+                && nativeInfo.optBoolean("available", false);
+        } catch (Exception | LinkageError error) {
+            nativeRuntimeReady = false;
         }
     }
 
@@ -244,10 +253,12 @@ public final class MainActivity extends AppCompatActivity {
         if (carousel == null) return;
         carousel.removeAllViews();
         boolean hasSelectedGame = selectedGame >= 0 && selectedGame < games.length();
-        boolean runtimeReady = PpssppActivity.libraryLoaded && pythonRuntimeReady;
+        boolean runtimeReady = PpssppActivity.libraryLoaded && pythonRuntimeReady && nativeRuntimeReady;
         runtimeText.setText(runtimeReady
-            ? "● PYTHON CONTROL + C++ PSP DISPLAY READY"
-            : (pythonRuntimeReady ? "● PSP CORE NOT LOADED" : "● PYTHON CONTROLLER NOT READY"));
+            ? "● PYTHON + CONSHITE C++ + PSP CORE READY"
+            : (!pythonRuntimeReady ? "● PYTHON CONTROLLER NOT READY"
+                : (!nativeRuntimeReady ? "● CONSHITE C++ RUNTIME NOT LOADED"
+                    : "● PSP CORE NOT LOADED")));
         runtimeText.setTextColor(runtimeReady
             ? Color.rgb(112, 220, 157) : Color.rgb(255, 166, 112));
         heroPlay.setVisibility(hasSelectedGame ? View.VISIBLE : View.GONE);
@@ -475,14 +486,15 @@ public final class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Select a game first.", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!pythonRuntimeReady || !PpssppActivity.libraryLoaded) {
-            Toast.makeText(this, "Python controller or PSP core is not ready.", Toast.LENGTH_LONG).show();
+        if (!pythonRuntimeReady || !nativeRuntimeReady || !PpssppActivity.libraryLoaded) {
+            Toast.makeText(this, "Python controller, Conshite C++ bridge, or PSP core is not ready.", Toast.LENGTH_LONG).show();
             return;
         }
         JSONObject game = games.optJSONObject(selectedGame);
         if (game == null) return;
         String path = game.optString("path", "");
         String oldUri = game.optString("uri", "");
+        String cppSessionId = null;
         try {
             Uri gameUri;
             JSONObject displaySession = null;
@@ -510,6 +522,24 @@ public final class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "Python runtime could not read the game file.", Toast.LENGTH_LONG).show();
                     return;
                 }
+
+                String cppHandshakeJson = ConshiteNativeBridge.prepareDisplaySession(
+                    file.getAbsolutePath(),
+                    displaySession.optString("engine"),
+                    displaySession.optString("native_library"),
+                    displaySession.optString("implementation_language"),
+                    displaySession.optString("android_activity"),
+                    displaySession.optString("surface_host"),
+                    PpssppActivity.libraryLoaded,
+                    launchData.optLong("size", file.length())
+                );
+                JSONObject cppHandshake = new JSONObject(cppHandshakeJson);
+                if (!cppHandshake.optBoolean("ok", false)) {
+                    throw new IllegalStateException(
+                        cppHandshake.optString("error", "C++ runtime rejected the display session.")
+                    );
+                }
+                cppSessionId = cppHandshake.optString("session_id");
                 gameUri = Uri.fromFile(file);
             } else if (!oldUri.isEmpty()) {
                 gameUri = Uri.parse(oldUri);
@@ -529,9 +559,18 @@ public final class MainActivity extends AppCompatActivity {
                 intent.putExtra("conshite.display.native_library", displaySession.optString("native_library"));
                 intent.putExtra("conshite.display.language", displaySession.optString("implementation_language"));
                 intent.putExtra("conshite.display.surface", displaySession.optString("surface_host"));
+                intent.putExtra("conshite.cpp.session_id", cppSessionId);
+                intent.putExtra("conshite.cpp.runtime", "conshite_native");
             }
             startActivity(intent);
+            if (cppSessionId != null
+                && !ConshiteNativeBridge.markActivityLaunchRequested(cppSessionId)) {
+                Toast.makeText(this, "C++ display session state changed before launch.", Toast.LENGTH_LONG).show();
+            }
         } catch (Exception error) {
+            ConshiteNativeBridge.abortDisplaySession(
+                error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage()
+            );
             String detail = error.getMessage() == null
                 ? error.getClass().getSimpleName() : error.getMessage();
             Toast.makeText(this, "Could not open game: " + detail, Toast.LENGTH_LONG).show();
