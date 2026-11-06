@@ -12,6 +12,8 @@ _SUPPORTED_FORMATS = {".iso", ".cso"}
 _DISPLAY_SESSION = {
     "engine": "PPSSPP",
     "native_library": "ppsspp_jni",
+    "conshite_native_library": "conshite_native",
+    "native_bridge_class": "com.akaswising.conshite.nativebridge.ConshiteNativeBridge",
     "implementation_language": "C++",
     "android_activity": "org.ppsspp.ppsspp.PpssppActivity",
     "surface_host": "Android SurfaceView/GLSurfaceView",
@@ -31,6 +33,11 @@ def runtime_info():
         "version": platform.python_version(),
         "role": "game-launch-controller",
         "display_session": display_session_info(),
+        "native_control": {
+            "library": "conshite_native",
+            "language": "C++17",
+            "purpose": "ISO-CSO-probe-and-display-session-manager",
+        },
     })
 
 
@@ -56,4 +63,9 @@ def prepare_game(game_path):
         "format": image_format[1:].upper(),
         "size": size,
         "display_session": display_session_info(),
+        "native_control": {
+            "library": "conshite_native",
+            "language": "C++17",
+            "purpose": "ISO-CSO-probe-and-display-session-manager",
+        },
     })
