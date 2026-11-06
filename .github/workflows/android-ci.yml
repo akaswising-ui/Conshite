@@ -35,6 +35,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Apply Conshite native branding and controller skin
+        run: python tools/apply_conshite_upstream_branding.py
+
       - name: Test Python game controller
         run: python -m unittest discover -s tools/tests -v
 
@@ -52,7 +55,7 @@ jobs:
         with:
           gradle-version: "9.4.1"
 
-      - name: Build Java GameHub and C++ PSP emulator
+      - name: Build Conshite game library and native game engine
         run: gradle --no-daemon --stacktrace :app:assembleNormalDebug
 
       - name: Verify native emulator and shared C++ runtime
@@ -72,6 +75,6 @@ jobs:
       - name: Upload Conshite debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: conshite-psp-debug-apk
+          name: conshite-gamehub-debug-apk
           path: app/build/outputs/apk/normal/debug/*.apk
           if-no-files-found: error
