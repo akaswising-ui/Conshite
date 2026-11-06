@@ -52,7 +52,7 @@ std::string DisplaySessionManager::BuildInfo() const {
         << "\"language\":\"C++17\",\"library\":\"conshite_native\","
         << "\"abi\":" << Quote(abi)
         << ",\"display_engine\":\"PPSSPP\","
-        << "\"renderer_library\":\"ppsspp_jni\","
+        << "\"renderer_library\":\"ppsspp_jni\",\"surface_bridge\":\"ANativeWindow\","
         << "\"image_probe\":\"ISO9660-PVD+CSO-CISO\","
         << "\"session_manager\":\"thread-safe\"}";
     return out.str();
@@ -66,7 +66,7 @@ std::string DisplaySessionManager::Prepare(const std::string& path,
     else if (engine != "PPSSPP") error = "Selected display engine is not PPSSPP.";
     else if (nativeLibrary != "ppsspp_jni") error = "Renderer library does not match PPSSPP JNI.";
     else if (language != "C++") error = "PSP renderer must use the native C++ engine.";
-    else if (activity != "org.ppsspp.ppsspp.PpssppActivity")
+    else if (activity != "com.akaswising.conshite.ConshitePpssppActivity")
         error = "Android renderer activity does not match the bundled PPSSPP activity.";
     else if (surface.find("SurfaceView") == std::string::npos)
         error = "Android display host is not a SurfaceView.";
