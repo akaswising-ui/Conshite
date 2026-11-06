@@ -48,7 +48,7 @@ std::string DisplaySessionManager::BuildInfo() const {
     const char* abi = "unknown";
 #endif
     std::ostringstream out;
-    out << "{\"available\":true,\"runtime\":\"Conshite Native Runtime\","
+    out << "{\"available\":true,\"runtime\":\"CI Runtime\","
         << "\"language\":\"C++17\",\"library\":\"conshite_native\","
         << "\"abi\":" << Quote(abi)
         << ",\"display_engine\":\"PPSSPP\","
