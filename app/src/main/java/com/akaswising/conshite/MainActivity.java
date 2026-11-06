@@ -622,7 +622,7 @@ public final class MainActivity extends AppCompatActivity {
     private void showAboutDialog() {
         new androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("About & licenses")
-            .setMessage("Conshite is independently branded. It includes the PPSSPP emulator core, licensed under GNU GPL v2 or later. Conshite is not affiliated with or endorsed by Sony Interactive Entertainment. No commercial game files are included. Use only game images you are legally entitled to use. Third-party notices and corresponding source are available in the project repository.")
+            .setMessage("Conshite is independently branded and includes third-party components licensed under GNU GPL v2 or later. Conshite is not affiliated with or endorsed by Sony Interactive Entertainment. No commercial game files are included. Use only game images you are legally entitled to use. Full third-party notices and corresponding source are available in the project repository.")
             .setPositiveButton("CLOSE", null)
             .show();
     }
