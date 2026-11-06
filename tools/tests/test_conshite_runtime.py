@@ -23,7 +23,7 @@ class ConshiteRuntimeTests(unittest.TestCase):
 
     def test_display_session_targets_android_native_render_surface(self):
         session = conshite_runtime.display_session_info()
-        self.assertEqual(session["android_activity"], "org.ppsspp.ppsspp.PpssppActivity")
+        self.assertEqual(session["android_activity"], "com.akaswising.conshite.ConshitePpssppActivity")
         self.assertEqual(session["surface_host"], "Android SurfaceView/GLSurfaceView")
         self.assertIn("OpenGL ES", session["graphics_backends"])
         self.assertIn("Vulkan", session["graphics_backends"])
