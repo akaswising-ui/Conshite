@@ -18,6 +18,8 @@ class ConshiteRuntimeTests(unittest.TestCase):
         self.assertEqual(info["display_session"]["engine"], "PPSSPP")
         self.assertEqual(info["display_session"]["native_library"], "ppsspp_jni")
         self.assertEqual(info["display_session"]["implementation_language"], "C++")
+        self.assertEqual(info["native_control"]["library"], "conshite_native")
+        self.assertEqual(info["native_control"]["language"], "C++17")
 
     def test_display_session_targets_android_native_render_surface(self):
         session = conshite_runtime.display_session_info()
@@ -35,6 +37,7 @@ class ConshiteRuntimeTests(unittest.TestCase):
             self.assertEqual(result["format"], "ISO")
             self.assertEqual(result["size"], 9)
             self.assertEqual(result["display_session"]["native_library"], "ppsspp_jni")
+            self.assertEqual(result["display_session"]["conshite_native_library"], "conshite_native")
 
     def test_prepare_cso_is_supported_case_insensitively(self):
         with tempfile.TemporaryDirectory() as folder:
