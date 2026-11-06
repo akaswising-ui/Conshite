@@ -47,9 +47,9 @@ public final class ConshitePpssppActivity extends PpssppActivity
     public void surfaceCreated(SurfaceHolder holder) {
         Surface surface = holder.getSurface();
         if (!ConshiteNativeBridge.onSurfaceCreated(surface)) {
-            Log.e(TAG, "C++ runtime could not attach the PPSSPP Android surface.");
+            Log.e(TAG, "CI Runtime native adapter could not attach the PPSSPP Android surface.");
         } else {
-            Log.i(TAG, "C++ runtime attached to the PPSSPP Android surface.");
+            Log.i(TAG, "CI Runtime native adapter attached to the PPSSPP Android surface.");
         }
     }
 
@@ -62,7 +62,7 @@ public final class ConshitePpssppActivity extends PpssppActivity
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         ConshiteNativeBridge.onSurfaceDestroyed();
-        Log.i(TAG, "C++ runtime detached from the PPSSPP Android surface.");
+        Log.i(TAG, "CI Runtime native adapter detached from the PPSSPP Android surface.");
     }
 
     @Override
