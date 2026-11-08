@@ -133,7 +133,7 @@ replace_once(
 
 \t\tconst bool tiny = versionString.size() > 10;
 
-\t\tconst FontStyle *style = GetTextStyle(dc, tiny ? TextSize::Tiny : TextSize::Small);
+\t\tconst FontStyle *style = GetTextStyle(dc, tiny ? UI::TextSize::Tiny : UI::TextSize::Small);
 \t\tdc.SetFontStyle(*style);
 \t\tdc.DrawText(versionString,
 \t\t\tbounds_.x + iconImg->w + 8,
@@ -144,7 +144,7 @@ replace_once(
     """\tvoid Draw(UIContext &dc) override {
 \t\tUI::AnchorLayout::Draw(dc);
 \t\tdc.Flush();
-\t\tconst FontStyle *style = GetTextStyle(dc, TextSize::Small);
+\t\tconst FontStyle *style = GetTextStyle(dc, UI::TextSize::Small);
 \t\tdc.SetFontStyle(*style);
 \t\tdc.DrawText("CONSHITE", bounds_.x, bounds_.y + 4, dc.GetTheme().infoStyle.fgColor);
 \t\tdc.SetFontStyle(dc.GetTheme().uiFont);
