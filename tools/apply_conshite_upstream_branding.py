@@ -133,7 +133,7 @@ replace_once(
 
 \t\tconst bool tiny = versionString.size() > 10;
 
-\t\tconst FontStyle *style = GetTextStyle(dc, tiny ? UI::TextSize::Tiny : UI::TextSize::Small);
+\t\tconst FontStyle *style = GetTextStyle(dc, tiny ? TextSize::Tiny : TextSize::Small);
 \t\tdc.SetFontStyle(*style);
 \t\tdc.DrawText(versionString,
 \t\t\tbounds_.x + iconImg->w + 8,
